@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{.Title}}</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+
+      <h3 class="text-center">{{.Title}}</h3>
+
+      <hr>
+
+      <form class="form-horizontal" action="{{.URI}}" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+          <label class="col-sm-2 control-label">Input File</label>
+          <div class="col-sm-8 input-group">
+            <span class="input-group-btn">
+              <label class="btn btn-primary">
+                Choose File
+                <input type="file" style="display:none" name="uploadfile"></input>
+              </label>
+            </span>
+            <input type="text" class="form-control" readonly="">
+            <span class="input-group-btn">
+              <button type="submit" class="btn btn-primary" disabled>Upload</button>
+            </span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label">Mode</label>
+          <div>
+            <label class="radio-inline"><input type="radio" name="mode" value="table" checked>Table</label>
+            <label class="radio-inline"><input type="radio" name="mode" value="text">Text</label>
+          </div>
+        </div>
+      </form>
+
+      <hr>
+
+      <h3 class="text-center">{{.ContentTitle}}</h3>
+
+      {{.ContentMain}}
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+      $(document).on('change', ':file', function(evt) {
+        // Display File Name
+        var input = $(this);
+        var label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+        input.parent().parent().next(':text').val(label);
+
+        if (label === '') {
+          input.parent().parent().next().next().children(':submit').get(0).disabled = true;
+        } else {
+          input.parent().parent().next().next().children(':submit').get(0).disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
