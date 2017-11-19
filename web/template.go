@@ -3,10 +3,12 @@ package main
 import (
   "flag"
   "fmt"
+  "io/ioutil"
   "log"
-  "os"
-  "html/template"
   "net/http"
+  "os"
+  "path"
+  "text/template"
 )
 
 var (
@@ -24,27 +26,59 @@ type Content struct {
   Body string
 }
 
-func Panic(err error) {
-  if err != nil {
-    panic(err)
-  }
-}
-
 func templateHandler(w http.ResponseWriter, r *http.Request) {
   tmpl, err := template.ParseFiles(htmlFile)
-  Panic(err)
+  if err != nil {
+    log.Printf(err.Error())
+    w.WriteHeader(http.StatusInternalServerError)
+    return
+  }
 
   switch r.Method {
   case "GET":
     content := Content{"Template Title", "Template Body"}
     err = tmpl.Execute(w, content)
-    Panic(err)
+    if err != nil {
+      log.Printf(err.Error())
+      w.WriteHeader(http.StatusInternalServerError)
+    }
+    return
 
   case "POST":
+    return
 
   default:
+    return
   }
 
+}
+
+func getFileHandler(w http.ResponseWriter, r *http.Request) {
+  switch r.Method {
+  case "GET":
+    var content string
+    file, err := ioutil.ReadFile(r.URL.Path[1:])
+    if err != nil {
+      w.WriteHeader(http.StatusInternalServerError)
+      return
+    }
+
+    switch path.Ext(r.URL.Path[1:])[1:] {
+    case "js":
+      content = "text/javascript"
+    case "css":
+      content = "text/css"
+    default:
+      content = "text/plane"
+    }
+    w.Header().Set("Content-Type", content)
+    w.WriteHeader(http.StatusOK)
+    w.Write(file)
+
+  default:
+    w.WriteHeader(http.StatusBadRequest)
+    return
+  }
 }
 
 func main() {
@@ -61,6 +95,7 @@ func main() {
   }
 
   log.Printf("Starting web service on port %d", port)
+  http.HandleFunc("/lib/", getFileHandler)
   http.HandleFunc("/", templateHandler)
   http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
 }
